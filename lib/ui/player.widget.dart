@@ -1,6 +1,8 @@
 import 'package:english_listening/model/Lession.model.dart';
 import 'package:english_listening/ui/lessionGalary.bloc.dart';
 import 'package:english_listening/ui/lessionPlayer.bloc.dart';
+import 'package:english_listening/ui/lessionPlayer.controller.bloc.dart';
+import 'package:english_listening/ui/lessionPlayerController.widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:video_player/video_player.dart';
@@ -17,7 +19,7 @@ class LessionPlayer extends StatefulWidget {
 class _LessionPlayerState extends State<LessionPlayer> {
   LessionPlayerBloc _bloc;
   // transcription controller
-  TextEditingController _controller;
+  final TextEditingController _controller = TextEditingController();
   @override
   void initState() {
     _bloc = LessionPlayerBloc(widget.parent);
@@ -27,6 +29,8 @@ class _LessionPlayerState extends State<LessionPlayer> {
 
   @override
   void dispose() {
+    _bloc.add(LessionPlayerEventUninit());
+    _bloc?.close();
     _controller.dispose();
     super.dispose();
   }
@@ -42,30 +46,52 @@ class _LessionPlayerState extends State<LessionPlayer> {
             builder: (context, state) {
               if (state is LessionPlayerStateLoaded) {
                 return Column(children: [
-                  AspectRatio(
-                      aspectRatio: state.aspectRatio,
-                      child: Stack(children: [
-                        VideoPlayer(state.controller),
-                        // controller
-                      ])),
+                  Container(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        AspectRatio(
+                          aspectRatio: state.controller.value.aspectRatio,
+                          child: VideoPlayer(state.controller),
+                          // controller
+                        ),
+                        LessionPlayerControllerWidget(
+                          bloc: LessionPlayerControllerBloc(
+                              videoController: state.controller),
+                        )
+                      ],
+                    ),
+                  ),
                   // edit text controller
                   Expanded(
                     child: Column(
                       children: <Widget>[
                         Expanded(
-                          child: TextField(
-                            controller: _controller,
-                            maxLines: null,
-                            expands: true,
-                            decoration: InputDecoration(
-                              labelText: 'Transciption',
+                          child: BlocListener<LessionPlayerBloc,
+                              LessionPlayerState>(
+                            bloc: _bloc,
+                            listener: (context, state) {
+                              if (state is LessionPlayerStateLoaded) {
+                                // set transcription text
+                                _controller.text = state.transcription;
+                              }
+                            },
+                            child: TextField(
+                              controller: _controller,
+                              maxLines: null,
+                              expands: true,
+                              decoration: InputDecoration(
+                                labelText: 'Transciption',
+                              ),
                             ),
                           ),
                         ),
-                        OutlineButton(onPressed: (){
-                          // save transciption
-                          
-                        },)
+                        OutlineButton(
+                          onPressed: () {
+                            // save transciption
+                          },
+                          child: Text('Submit'),
+                        )
                       ],
                     ),
                   )

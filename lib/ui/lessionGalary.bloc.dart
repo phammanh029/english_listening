@@ -1,9 +1,9 @@
-import 'dart:io';
+// import 'dart:io';
 
 import 'package:english_listening/model/Lession.model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:bloc/bloc.dart';
-import 'package:video_player/video_player.dart';
+// import 'package:video_player/video_player.dart';
 
 class LessionGalaryEvent extends Equatable {
   @override
@@ -91,7 +91,7 @@ class LessionGalaryBloc extends Bloc<LessionGalaryEvent, LessionGalaryState> {
         _lessions = [
           ..._lessions,
           ...(event.items ?? [])
-              .map((item) => Lession(path: item, transcript: ''))
+              .map((item) => Lession(path: item, transcript: 'test transcription'))
               .toList()
         ];
         yield LessionGalaryStateMediasSet(_lessions);

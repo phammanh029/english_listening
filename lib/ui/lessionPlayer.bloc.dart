@@ -4,13 +4,15 @@ import 'package:english_listening/model/Lession.model.dart';
 import 'package:english_listening/ui/lessionGalary.bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
+// import 'package:meta/meta.dart';
 import 'package:video_player/video_player.dart';
 
 class LessionPlayerEvent extends Equatable {
   @override
   List<Object> get props => [];
 }
+
+class LessionPlayerEventUninit extends LessionPlayerEvent {}
 
 class LessionPlayerEventInit extends LessionPlayerEvent {
   final Lession lession;
@@ -30,12 +32,13 @@ class LessionPlayerStateInitial extends LessionPlayerState {}
 
 class LessionPlayerStateLoaded extends LessionPlayerState {
   final VideoPlayerController controller;
-  final double aspectRatio;
+  final String transcription;
+  // final double aspectRatio;
 
-  LessionPlayerStateLoaded(this.controller, this.aspectRatio);
+  LessionPlayerStateLoaded(this.controller, this.transcription);
 
   @override
-  List<Object> get props => [aspectRatio, controller];
+  List<Object> get props => [controller, transcription];
 }
 
 class LessionPlayerStateLoading extends LessionPlayerState {}
@@ -69,9 +72,13 @@ class LessionPlayerBloc extends Bloc<LessionPlayerEvent, LessionPlayerState> {
         await _controller?.dispose();
         _controller = VideoPlayerController.file(File(_lession.path));
         await _controller.initialize();
-        print('initialized');
+        // print('initialized');
         _controller.play();
-        yield LessionPlayerStateLoaded(_controller, _controller.value.aspectRatio);
+        yield LessionPlayerStateLoaded(_controller, _lession.transcript);
+      }
+
+      if (event is LessionPlayerEventUninit) {
+        await _controller?.dispose();
       }
     } catch (error) {
       yield LessionPlayerStateError(error.toString());
