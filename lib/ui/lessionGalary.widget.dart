@@ -19,6 +19,7 @@ class _LessionGalaryWidgetState extends State<LessionGalaryWidget> {
   @override
   void initState() {
     _bloc = LessionGalaryBloc();
+    _bloc.add(LessionGalaryEventInit());
     super.initState();
   }
 
@@ -39,9 +40,10 @@ class _LessionGalaryWidgetState extends State<LessionGalaryWidget> {
         context: context,
         builder: (context) {
           return ListView(
+            shrinkWrap: true,
             children: <Widget>[
               ListTile(
-                title: Text('Add viedeo'),
+                title: Text('Add video'),
                 onTap: () {
                   Navigator.pop(context, AddMediaAction.Local);
                 },
@@ -94,6 +96,11 @@ class _LessionGalaryWidgetState extends State<LessionGalaryWidget> {
           }
 
           if (state is LessionGalaryStateMediasSet) {
+            if (state.lessions.isEmpty) {
+              return Center(
+                child: Text('No media'),
+              );
+            }
             // display list of media
             return GridView.builder(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

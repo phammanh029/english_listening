@@ -19,6 +19,8 @@ class LessionGalaryEventAddMediaQueues extends LessionGalaryEvent {
   List<Object> get props => [items];
 }
 
+class LessionGalaryEventInit extends LessionGalaryEvent {}
+
 class LessionGalaryEventViewLession extends LessionGalaryEvent {
   final Lession lession;
 
@@ -70,7 +72,6 @@ class LessionGalaryStateError extends LessionGalaryState {
 
 // BLOC
 class LessionGalaryBloc extends Bloc<LessionGalaryEvent, LessionGalaryState> {
-  
   List<Lession> _lessions = [];
   @override
   LessionGalaryState get initialState => LessionGalaryStateInitial();
@@ -78,6 +79,12 @@ class LessionGalaryBloc extends Bloc<LessionGalaryEvent, LessionGalaryState> {
   @override
   Stream<LessionGalaryState> mapEventToState(LessionGalaryEvent event) async* {
     try {
+      if (event is LessionGalaryEventInit) {
+        // @TODO load from database
+        yield LessionGalaryStateLoading();
+        await Future.delayed(Duration(seconds: 2));
+        yield LessionGalaryStateMediasSet(_lessions);
+      }
       if (event is LessionGalaryEventAddMediaQueues) {
         yield LessionGalaryStateLoading();
         // add to list of current file
@@ -92,7 +99,7 @@ class LessionGalaryBloc extends Bloc<LessionGalaryEvent, LessionGalaryState> {
 
       if (event is LessionGalaryEventViewLession) {
         // do set controller
-        
+
         // do display video
       }
     } catch (error) {
