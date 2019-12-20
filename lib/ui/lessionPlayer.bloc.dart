@@ -28,7 +28,15 @@ class LessionPlayerState extends Equatable {
 class LessionPlayerStateInitial extends LessionPlayerState {}
 // class LessionPlayerStateInitial extends LessionPlayerState {}
 
-class LessionPlayerStateLoaded extends LessionPlayerState {}
+class LessionPlayerStateLoaded extends LessionPlayerState {
+  final VideoPlayerController controller;
+  final double aspectRatio;
+
+  LessionPlayerStateLoaded(this.controller, this.aspectRatio);
+
+  @override
+  List<Object> get props => [aspectRatio, controller];
+}
 
 class LessionPlayerStateLoading extends LessionPlayerState {}
 
@@ -61,6 +69,9 @@ class LessionPlayerBloc extends Bloc<LessionPlayerEvent, LessionPlayerState> {
         await _controller?.dispose();
         _controller = VideoPlayerController.file(File(_lession.path));
         await _controller.initialize();
+        print('initialized');
+        _controller.play();
+        yield LessionPlayerStateLoaded(_controller, _controller.value.aspectRatio);
       }
     } catch (error) {
       yield LessionPlayerStateError(error.toString());

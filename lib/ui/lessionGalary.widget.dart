@@ -1,6 +1,7 @@
 import 'package:english_listening/app.dart';
 import 'package:english_listening/model/Lession.model.dart';
 import 'package:english_listening/ui/lessionGalary.bloc.dart';
+import 'package:english_listening/ui/player.widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -30,7 +31,16 @@ class _LessionGalaryWidgetState extends State<LessionGalaryWidget> {
   }
 
   Widget _buildLessionItem(BuildContext context, Lession item) {
-    return Container(
+    return InkWell(
+      onTap: () async {
+        await Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => LessionPlayer(
+                      lession: item,
+                      parent: _bloc,
+                    )));
+      },
       child: Text(item.path),
     );
   }
@@ -47,6 +57,12 @@ class _LessionGalaryWidgetState extends State<LessionGalaryWidget> {
                 onTap: () {
                   Navigator.pop(context, AddMediaAction.Local);
                 },
+              ),
+              ListTile(
+                title: Text('Add url'),
+                onTap: () {
+                  Navigator.pop(context, AddMediaAction.Network);
+                },
               )
             ],
           );
@@ -56,11 +72,22 @@ class _LessionGalaryWidgetState extends State<LessionGalaryWidget> {
       switch (result) {
         case AddMediaAction.Local:
           final file = await ImagePicker.pickVideo(source: ImageSource.gallery);
-          _bloc.add(LessionGalaryEventAddMediaQueues(items: [file.path]));
+          if (file != null) {
+            _bloc.add(LessionGalaryEventAddMediaQueues(items: [file.path]));
+          }
+          break;
+        case AddMediaAction.Network:
+          // do download file
           break;
         default:
           break;
       }
+    }
+  }
+
+  Future _addNetworkMedia(String url) async {
+    try {} catch (error) {
+      print(error);
     }
   }
 
@@ -83,10 +110,10 @@ class _LessionGalaryWidgetState extends State<LessionGalaryWidget> {
         bloc: _bloc,
         builder: (context, state) {
           if (state is LessionGalaryStateLoading) {
-            return CircularProgressIndicator();
+            return Center(child: CircularProgressIndicator());
           }
           if (state is LessionGalaryStateInitial) {
-            return CircularProgressIndicator();
+            return Center(child: CircularProgressIndicator());
           }
 
           if (state is LessionGalaryStateError) {
