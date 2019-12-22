@@ -1,6 +1,7 @@
 // import 'dart:io';
 
 import 'package:english_listening/model/Lession.model.dart';
+import 'package:english_listening/services/database_service.dart';
 import 'package:equatable/equatable.dart';
 import 'package:bloc/bloc.dart';
 // import 'package:video_player/video_player.dart';
@@ -82,18 +83,26 @@ class LessionGalaryBloc extends Bloc<LessionGalaryEvent, LessionGalaryState> {
       if (event is LessionGalaryEventInit) {
         // @TODO load from database
         yield LessionGalaryStateLoading();
-        await Future.delayed(Duration(seconds: 2));
+        final instance = await DatabaseService.instance;
+        _lessions = (await instance.listLessions()) ?? [];
+        // await Future.delayed(Duration(seconds: 2));
         yield LessionGalaryStateMediasSet(_lessions);
       }
       if (event is LessionGalaryEventAddMediaQueues) {
         yield LessionGalaryStateLoading();
+        final instance = await DatabaseService.instance;
+        final newLessions =
+            (await Future.wait((event.items ?? []).map((item) async {
+          final lession = Lession(path: item, transcript: 'test transcription');
+          if (await instance.addNewLession(lession)) {
+            return lession;
+          }
+          return null;
+        }).toList()))
+                .where((item) => item != null)
+                .toList();
         // add to list of current file
-        _lessions = [
-          ..._lessions,
-          ...(event.items ?? [])
-              .map((item) => Lession(path: item, transcript: 'test transcription'))
-              .toList()
-        ];
+        _lessions = [..._lessions, ...newLessions];
         yield LessionGalaryStateMediasSet(_lessions);
       }
 
