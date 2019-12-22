@@ -51,7 +51,9 @@ class _LessionPlayerState extends State<LessionPlayer> {
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         AspectRatio(
-                          aspectRatio: state.controller.value.aspectRatio,
+                          aspectRatio: state.controller.value.aspectRatio > 0
+                              ? state.controller.value.aspectRatio
+                              : 4.0 / 3,
                           child: VideoPlayer(state.controller),
                           // controller
                         ),

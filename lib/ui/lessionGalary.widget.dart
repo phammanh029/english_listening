@@ -2,9 +2,10 @@ import 'package:english_listening/app.dart';
 import 'package:english_listening/model/Lession.model.dart';
 import 'package:english_listening/ui/lessionGalary.bloc.dart';
 import 'package:english_listening/ui/player.widget.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
+// import 'package:image_picker/image_picker.dart';
 // import 'package:multi_image_picker/multi_image_picker.dart';
 
 enum AddMediaAction { Local, Network }
@@ -71,9 +72,19 @@ class _LessionGalaryWidgetState extends State<LessionGalaryWidget> {
     if (result != null) {
       switch (result) {
         case AddMediaAction.Local:
-          final file = await ImagePicker.pickVideo(source: ImageSource.gallery);
-          if (file != null) {
-            _bloc.add(LessionGalaryEventAddMediaQueues(items: [file.path]));
+          // final file = await ImagePicker.pickVideo(source: ImageSource.gallery);
+          final files = await FilePicker.getMultiFile(type: FileType.ANY);
+
+          if (files != null && files.length > 0) {
+            // only get mp3 or mo4 files
+            const supportFormats = ['mp3', 'mp4'];
+            _bloc.add(LessionGalaryEventAddMediaQueues(
+                items: files
+                    .where((file) => supportFormats.contains(file.path
+                        .toLowerCase()
+                        .substring(file.path.lastIndexOf('.') + 1)))
+                    .map((file) => file.path)
+                    .toList()));
           }
           break;
         case AddMediaAction.Network:
