@@ -14,7 +14,7 @@ class Lession {
   static Lession fromJson(Map<String, dynamic> jsonData) => Lession(
       path: jsonData['path'],
       thumbnail: jsonData['thumbnail'],
-      transcript: jsonData['transcripton']);
+      transcript: jsonData['transcription']);
 
   Map<String, dynamic> toJson() =>
       {'path': path, 'transcription': transcript, 'thumbnail': thumbnail};

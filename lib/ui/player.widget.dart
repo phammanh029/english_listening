@@ -1,4 +1,4 @@
-import 'package:english_listening/model/Lession.model.dart';
+// import 'package:english_listening/model/Lession.model.dart';
 import 'package:english_listening/ui/lessionGalary.bloc.dart';
 import 'package:english_listening/ui/lessionPlayer.bloc.dart';
 import 'package:english_listening/ui/lessionPlayer.controller.bloc.dart';
@@ -8,10 +8,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:video_player/video_player.dart';
 
 class LessionPlayer extends StatefulWidget {
-  final Lession lession;
+  final String lessionPath;
   final LessionGalaryBloc parent;
 
-  const LessionPlayer({Key key, this.lession, this.parent}) : super(key: key);
+  const LessionPlayer({Key key, this.lessionPath, this.parent}) : super(key: key);
   @override
   _LessionPlayerState createState() => _LessionPlayerState();
 }
@@ -23,7 +23,7 @@ class _LessionPlayerState extends State<LessionPlayer> {
   @override
   void initState() {
     _bloc = LessionPlayerBloc(widget.parent);
-    _bloc.add(LessionPlayerEventInit(widget.lession));
+    _bloc.add(LessionPlayerEventInit(widget.lessionPath));
     super.initState();
   }
 
@@ -75,6 +75,7 @@ class _LessionPlayerState extends State<LessionPlayer> {
                             listener: (context, state) {
                               if (state is LessionPlayerStateLoaded) {
                                 // set transcription text
+                                print('test: ${state.transcription}');
                                 _controller.text = state.transcription;
                               }
                             },

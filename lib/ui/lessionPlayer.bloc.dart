@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:english_listening/model/Lession.model.dart';
+import 'package:english_listening/services/database_service.dart';
 import 'package:english_listening/ui/lessionGalary.bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:bloc/bloc.dart';
@@ -14,12 +15,20 @@ class LessionPlayerEvent extends Equatable {
 
 class LessionPlayerEventUninit extends LessionPlayerEvent {}
 
-class LessionPlayerEventInit extends LessionPlayerEvent {
+class LessionPlayerEventUpdateTranscription extends LessionPlayerEvent {
   final Lession lession;
 
-  LessionPlayerEventInit(this.lession);
+  LessionPlayerEventUpdateTranscription(this.lession);
   @override
   List<Object> get props => [lession];
+}
+
+class LessionPlayerEventInit extends LessionPlayerEvent {
+  final String lessionPath;
+
+  LessionPlayerEventInit(this.lessionPath);
+  @override
+  List<Object> get props => [lessionPath];
 }
 
 class LessionPlayerState extends Equatable {
@@ -67,13 +76,24 @@ class LessionPlayerBloc extends Bloc<LessionPlayerEvent, LessionPlayerState> {
   Stream<LessionPlayerState> mapEventToState(LessionPlayerEvent event) async* {
     try {
       if (event is LessionPlayerEventInit) {
-        _lession = event.lession;
+        final instance = await DatabaseService.instance;
+        _lession = await instance.getLession(event.lessionPath);
+        print(_lession.transcript);
         // initialize video player
         await _controller?.dispose();
         _controller = VideoPlayerController.file(File(_lession.path));
         await _controller.initialize();
         // print('initialized');
         _controller.play();
+        yield LessionPlayerStateLoaded(_controller, _lession.transcript);
+      }
+
+      if (event is LessionPlayerEventUpdateTranscription) {
+        _lession = event.lession;
+        // do udpdate to database
+        final instance = await DatabaseService.instance;
+        await instance.updateLession(_lession);
+
         yield LessionPlayerStateLoaded(_controller, _lession.transcript);
       }
 

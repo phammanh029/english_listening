@@ -57,6 +57,7 @@ class DatabaseService {
     final result =
         await _database.query('lessions', where: 'path = ?', whereArgs: [path]);
     if (result != null && result.length > 0) {
+      // print(result[0]);
       return Lession.fromJson(result[0]);
     }
 

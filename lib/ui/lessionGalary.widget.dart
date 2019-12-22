@@ -38,7 +38,7 @@ class _LessionGalaryWidgetState extends State<LessionGalaryWidget> {
             context,
             MaterialPageRoute(
                 builder: (context) => LessionPlayer(
-                      lession: item,
+                      lessionPath: item.path,
                       parent: _bloc,
                     )));
       },
