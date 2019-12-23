@@ -11,7 +11,8 @@ class LessionPlayer extends StatefulWidget {
   final String lessionPath;
   final LessionGalaryBloc parent;
 
-  const LessionPlayer({Key key, this.lessionPath, this.parent}) : super(key: key);
+  const LessionPlayer({Key key, this.lessionPath, this.parent})
+      : super(key: key);
   @override
   _LessionPlayerState createState() => _LessionPlayerState();
 }
@@ -19,7 +20,7 @@ class LessionPlayer extends StatefulWidget {
 class _LessionPlayerState extends State<LessionPlayer> {
   LessionPlayerBloc _bloc;
   // transcription controller
-  final TextEditingController _controller = TextEditingController();
+  TextEditingController _controller = TextEditingController();
   @override
   void initState() {
     _bloc = LessionPlayerBloc(widget.parent);
@@ -31,7 +32,7 @@ class _LessionPlayerState extends State<LessionPlayer> {
   void dispose() {
     _bloc.add(LessionPlayerEventUninit());
     _bloc?.close();
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -41,69 +42,70 @@ class _LessionPlayerState extends State<LessionPlayer> {
         appBar: AppBar(
           title: Text('Player'),
         ),
-        body: BlocBuilder<LessionPlayerBloc, LessionPlayerState>(
-            bloc: _bloc,
-            builder: (context, state) {
-              if (state is LessionPlayerStateLoaded) {
-                return Column(children: [
-                  Container(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        AspectRatio(
-                          aspectRatio: state.controller.value.aspectRatio > 0
-                              ? state.controller.value.aspectRatio
-                              : 4.0 / 3,
-                          child: VideoPlayer(state.controller),
-                          // controller
-                        ),
-                        LessionPlayerControllerWidget(
-                          bloc: LessionPlayerControllerBloc(
-                              videoController: state.controller),
-                        )
-                      ],
-                    ),
-                  ),
-                  // edit text controller
-                  Expanded(
-                    child: Column(
-                      children: <Widget>[
-                        Expanded(
-                          child: BlocListener<LessionPlayerBloc,
-                              LessionPlayerState>(
-                            bloc: _bloc,
-                            listener: (context, state) {
-                              if (state is LessionPlayerStateLoaded) {
-                                // set transcription text
-                                print('test: ${state.transcription}');
-                                _controller.text = state.transcription;
-                              }
-                            },
-                            child: TextField(
-                              controller: _controller,
-                              maxLines: null,
-                              expands: true,
-                              decoration: InputDecoration(
-                                labelText: 'Transciption',
-                              ),
-                            ),
+        body: BlocListener<LessionPlayerBloc, LessionPlayerState>(
+          bloc: _bloc,
+          listener: (context, state) {
+            if (state is LessionPlayerStateLoaded) {
+              // set transcription text
+              print('test: ${state.transcription}');
+              _controller?.dispose();
+              _controller = TextEditingController(text: state.transcription);
+            }
+          },
+          child: BlocBuilder<LessionPlayerBloc, LessionPlayerState>(
+              bloc: _bloc,
+              builder: (context, state) {
+                if (state is LessionPlayerStateLoaded) {
+                  return Column(children: [
+                    Container(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          AspectRatio(
+                            aspectRatio: state.controller.value.aspectRatio > 0
+                                ? state.controller.value.aspectRatio
+                                : 4.0 / 3,
+                            child: VideoPlayer(state.controller),
+                            // controller
                           ),
-                        ),
-                        OutlineButton(
-                          onPressed: () {
-                            // save transciption
-                          },
-                          child: Text('Submit'),
-                        )
-                      ],
+                          LessionPlayerControllerWidget(
+                            bloc: LessionPlayerControllerBloc(
+                                videoController: state.controller),
+                          )
+                        ],
+                      ),
                     ),
-                  )
-                ]);
-              }
+                    // edit text controller
+                    Expanded(
+                      child: Column(
+                        children: <Widget>[
+                          Expanded(
+                              child: TextField(
+                            controller: _controller,
+                            maxLines: null,
+                            expands: true,
+                            decoration: InputDecoration(
+                              labelText: 'Transciption',
+                            ),
+                          )),
+                          OutlineButton(
+                            onPressed: () {
+                              // save transciption
+                              _bloc.add(LessionPlayerEventUpdateTranscription(
+                                  _controller?.text));
+                            },
+                            child: Text('Submit'),
+                          )
+                        ],
+                      ),
+                    )
+                  ]);
+                }
 
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            }));
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }),
+        ));
   }
 }

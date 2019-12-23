@@ -16,11 +16,11 @@ class LessionPlayerEvent extends Equatable {
 class LessionPlayerEventUninit extends LessionPlayerEvent {}
 
 class LessionPlayerEventUpdateTranscription extends LessionPlayerEvent {
-  final Lession lession;
+  final String transcription;
 
-  LessionPlayerEventUpdateTranscription(this.lession);
+  LessionPlayerEventUpdateTranscription(this.transcription);
   @override
-  List<Object> get props => [lession];
+  List<Object> get props => [transcription];
 }
 
 class LessionPlayerEventInit extends LessionPlayerEvent {
@@ -89,7 +89,7 @@ class LessionPlayerBloc extends Bloc<LessionPlayerEvent, LessionPlayerState> {
       }
 
       if (event is LessionPlayerEventUpdateTranscription) {
-        _lession = event.lession;
+        _lession = _lession.copyWith(transcript: event.transcription);
         // do udpdate to database
         final instance = await DatabaseService.instance;
         await instance.updateLession(_lession);
