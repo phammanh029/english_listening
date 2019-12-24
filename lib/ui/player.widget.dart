@@ -48,7 +48,7 @@ class _LessionPlayerState extends State<LessionPlayer> {
             if (state is LessionPlayerStateLoaded) {
               // set transcription text
               print('test: ${state.transcription}');
-              _controller?.dispose();
+              // _controller?.dispose();
               _controller = TextEditingController(text: state.transcription);
             }
           },
